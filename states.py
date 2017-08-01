@@ -11,7 +11,7 @@ import csv
 rho_array = []
 witness = []
 
-for i in range(10000):
+for i in range(2500):
 	rho = rand_dm(4, pure = 'True', dims=[[2,2], [2,2]])
 	rho_pt = partial_transpose(rho,[1,0])
 	
@@ -24,7 +24,7 @@ for i in range(10000):
 	else:
 		witness.append([0,1])
 
-for i in range(10000):
+for i in range(2500):
 	rho = rand_dm(4, pure = 'False', dims = [[2,2], [2,2]])
 	rho_pt = partial_transpose(rho,[1,0])
 

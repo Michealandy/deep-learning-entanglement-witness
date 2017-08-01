@@ -33,30 +33,32 @@ num_h1 = 50
 print("Starting Learning Process")
 tf.reset_default_graph()
 
-# Defining Input, Weights and Biases
+# Defining Input, Weights and Biase
 with tf.name_scope('input'):
 	x = tf.placeholder("float", shape = [None, num_features], name = "density_matrix")
 	y = tf.placeholder("float", shape = [None, num_labels], name = "entanglement_witness")
 
 with tf.name_scope('weights'):
-	w1 = tf.Variable(tf.truncated_normal([num_features,num_h1]), name = 'w1')
-	w2 = tf.Variable(tf.truncated_normal([num_h1,num_labels]), name = 'w2')
+	w1 = tf.Variable(tf.random_normal([num_features,num_h1]), name = 'w1')
+	w2 = tf.Variable(tf.random_normal([num_h1,num_labels]), name = 'w2')
 
 with tf.name_scope('biases'):
-	b1 = tf.Variable(tf.truncated_normal([1,num_h1]), name = 'b1')
-	b2 = tf.Variable(tf.truncated_normal([1,num_labels]), name = 'b2')
+	b1 = tf.Variable(tf.random_normal([1,num_h1]), name = 'b1')
+	b2 = tf.Variable(tf.random_normal([1,num_labels]), name = 'b2')
 
 # Multilayered Neural Network
 with tf.name_scope('layer_1'):
-	layer_1 = tf.nn.relu(tf.add(tf.matmul(x,w1), b1))
+	layer_1 = tf.nn.tanh(tf.add(tf.matmul(x,w1), b1))
 with tf.name_scope('layer_2'):
-	layer_2 = tf.nn.relu(tf.add(tf.matmul(layer_1,w2), b2))
+	layer_2 = tf.nn.tanh(tf.add(tf.matmul(layer_1,w2), b2))
 
 # Training Parameters
-num_iter = int(1000)
-batch_size = 16
+num_iter = int(1e3)
+batch_size = 4
 Lambda = 1e-2
 learning_rate = 1e-2
+
+y_ = tf.add(tf.matmul(layer_1,w2), b2)
 
 # Regularization
 with tf.name_scope('regularization'):
@@ -64,16 +66,14 @@ with tf.name_scope('regularization'):
 
 # Loss function
 with tf.name_scope('loss'):
-	#loss = tf.reduce_mean(tf.square(layer_2 - y)) + Lambda*regularization
-	loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = layer_2, labels = y))
+	loss = tf.reduce_mean(tf.square(y_ - y)) + Lambda*regularization
+	#loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = y_, labels = y))
 	loss = tf.Print(loss, [loss], "loss_")
 
 # Optimization
 with tf.name_scope('train'):
 	train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 	#summary_op = tf.summary.merge_all()
-
-y_ = tf.add(tf.matmul(layer_1,w2), b2)
 
 with tf.name_scope('accuracy'):
 	correct_prediction = tf.equal(tf.argmax(y_,1), tf.argmax(y,1))
@@ -89,7 +89,6 @@ with tf.Session() as session:
 
 	for i in range(num_iter):
 		offset = (i * batch_size) % (len(x_train) - batch_size)
-		if offset == 0: print(offset)
 		batch_x = x_train[offset:(offset+batch_size),:]
 		batch_y = y_train[offset:(offset+batch_size),:]
 
