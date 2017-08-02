@@ -3,6 +3,8 @@ import numpy as np
 import tensorflow as tf
 from functions import *
 
+print("Separating train and test data...")
+
 # Loaging data and separating features from labels
 features = csv_to_array('features.csv',"complex")
 labels = csv_to_array('labels.txt',"int")
@@ -28,7 +30,7 @@ x_test, y_test = features_labels[n:,:num_features], features_labels[n:,num_featu
 # Network Parameters
 num_features = int(len(features[0]))
 num_labels = int(len(labels[0]))
-num_h1 = 50
+num_h1 = 32
 
 print("Starting Learning Process")
 tf.reset_default_graph()
